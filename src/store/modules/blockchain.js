@@ -1,7 +1,12 @@
-import { Blockchain, Block } from '@/blockchain';
+/* eslint-disable
+     no-console
+*/
+import { Blockchain } from '@/blockchain';
+import MiningWorker from '@/workers/mining';
 
 const getters = {
   blockchain: state => state.blockchain,
+  mining: state => state.mining,
 };
 
 const mutations = {
@@ -22,24 +27,36 @@ const actions = {
   addBlock({ commit, state }, { data }) {
     const index = state.blockchain.chain.length;
     const date = new Date().toUTCString();
-    const block = new Block(index, date, data);
 
     commit('startMining');
 
     return new Promise((resolve) => {
-      block.previousHash = state.blockchain.getLatestBlock().hash;
-      block.hash = block.calculateHash();
-      block.mineBlock(state.minerDifficulty);
+      const worker = new MiningWorker();
+      const previousHash = state.blockchain.getLatestBlock().hash;
+      const minerDifficulty = state.minerDifficulty;
 
-      commit('stopMining');
+      worker.postMessage([{
+        index,
+        date,
+        data,
+        previousHash,
+        minerDifficulty,
+      }]);
 
-      resolve(block);
+      worker.addEventListener('message', (event) => {
+        resolve(event.data);
+        commit('stopMining');
+      });
+
+      worker.addEventListener('error', (error) => {
+        console.error(error);
+      });
     });
   },
 };
 
 const state = {
-  minerDifficulty: 2,
+  minerDifficulty: 3,
   mining: false,
   blockchain: new Blockchain(),
 };

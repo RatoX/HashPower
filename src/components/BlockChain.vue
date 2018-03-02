@@ -6,6 +6,7 @@
       <label :model="data" for="data">Dados:</label>
       <input name="data" type="text" @keyup.enter="addBlock">
       <button @click="addBlock" v-if="!mining">Adicionar</button>
+      <button v-if="mining" disabled>Minerando</button>
     </section>
     <section
       class="blockchain__last-block"
@@ -34,9 +35,7 @@ export default {
   name: 'BlockChain',
   data() {
     return {
-      msg: 'Welcome to Your Vue.js App',
       data: '',
-      mining: false,
     };
   },
   methods: {
@@ -47,6 +46,10 @@ export default {
   computed: {
     isBlockchainCreated() {
       return !!this.$store.getters.blockchain;
+    },
+
+    mining() {
+      return this.$store.getters.mining;
     },
 
     lastBlock() {

@@ -1,7 +1,7 @@
 /* eslint-disable
      class-methods-use-this,
      no-param-reassign,
-     no-plusplus
+     no-plusplus,
 */
 import SHA256 from 'crypto-js/sha256';
 
@@ -26,7 +26,6 @@ class Block {
     while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join('0')) {
       this.nonce++;
       this.hash = this.calculateHash();
-      console.log(this.hash, ' !== ', Array(difficulty + 1).join('0'), this.nonce);
     }
 
     return `BLOCK MINED: ${this.hash}`;
