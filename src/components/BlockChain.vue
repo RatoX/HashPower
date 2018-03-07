@@ -3,8 +3,11 @@
     <section
       class="blockchain_add-block"
       v-if="isBlockchainCreated">
-      <label :model="data" for="data">Dados:</label>
-      <input name="data" type="text" @keyup.enter="addBlock">
+      <label for="data">Dados:</label>
+      <input v-model="data"
+        name="data"
+        type="text"
+        @keyup.enter="addBlock">
       <button @click="addBlock" v-if="!mining">Adicionar</button>
       <button v-if="mining" disabled>Minerando</button>
     </section>
@@ -36,11 +39,16 @@ export default {
   data() {
     return {
       data: '',
+      lastBlock: {},
     };
   },
   methods: {
     addBlock() {
-      this.$store.dispatch('addBlock', this.data);
+      this.$store
+        .dispatch('addBlock', { data: this.data })
+        .then((lastBlock) => {
+          this.lastBlock = lastBlock;
+        });
     },
   },
   computed: {
@@ -50,10 +58,6 @@ export default {
 
     mining() {
       return this.$store.getters.mining;
-    },
-
-    lastBlock() {
-      return this.$store.getters.blockchain.getLatestBlock();
     },
   },
 };

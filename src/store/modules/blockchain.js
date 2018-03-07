@@ -10,7 +10,7 @@ const getters = {
 };
 
 const mutations = {
-  addBlock(state, { block }) {
+  attachBlockOnChain(state, { block }) {
     state.blockchain.addBlock(block);
   },
 
@@ -25,12 +25,11 @@ const mutations = {
 
 const actions = {
   addBlock({ commit, state }, { data }) {
-    const index = state.blockchain.chain.length;
-    const date = new Date().toUTCString();
-
     commit('startMining');
 
     return new Promise((resolve) => {
+      const index = state.blockchain.chain.length;
+      const date = new Date().toUTCString();
       const worker = new MiningWorker();
       const previousHash = state.blockchain.getLatestBlock().hash;
       const minerDifficulty = state.minerDifficulty;
@@ -44,7 +43,10 @@ const actions = {
       }]);
 
       worker.addEventListener('message', (event) => {
-        resolve(event.data);
+        const block = event.data;
+
+        commit('attachBlockOnChain', { block });
+        resolve(block);
         commit('stopMining');
       });
 
